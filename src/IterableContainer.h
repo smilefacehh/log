@@ -37,8 +37,8 @@ class IterableQueue : public IterableContainer<T, Container>, public std::queue<
     IterableQueue(std::queue<T, Container> q)
     {
         std::size_t cnt = 0;
-        // todo 100
-        while(++cnt < 100 && !q.empty())
+        // todo 3 + 1，多push进去一个，这样能生成省略号
+        while(cnt++ < 3 + 1 && !q.empty())
         {
             this->push(q.front());
             q.pop();
@@ -56,8 +56,8 @@ class IterablePriorityQueue : public IterableContainer<T, Container>, public std
     IterablePriorityQueue(std::priority_queue<T, Container, Compare> q)
     {
         std::size_t cnt = 0;
-        // todo 100
-        while(++cnt < 100 && !q.empty())
+        // todo 3 + 1
+        while(cnt++ < 3 + 1 && !q.empty())
         {
             this->push(q.top());
             q.pop();
@@ -74,8 +74,8 @@ class IterableStack : public IterableContainer<T, Container>, public std::stack<
     IterableStack(std::stack<T, Container> s)
     {
         std::size_t cnt = 0;
-        // todo 100
-        while(++cnt < 100 && !s.empty())
+        // todo 3 + 1
+        while(cnt++ < 3 + 1 && !s.empty())
         {
             this->push(s.top());
             s.pop();

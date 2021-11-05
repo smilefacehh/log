@@ -9,8 +9,6 @@
 
 namespace Nlog
 {
-class LogMessage;
-
 class RotateFileLogger : public Logger
 {
   public:

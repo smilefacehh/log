@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <string.h>
 
 namespace Nlog
 {
@@ -58,14 +59,15 @@ LogMessage::LogMessage(LogSeverity msg_severity, const char* const file, const c
         time(&tv_.tv_sec);
         tv_.tv_usec = 0;
     }
-    //    FillLogHeader();
+    // todo
+    stream_ << std::fixed;
 }
 
 LogMessage::~LogMessage() { Flush(); }
 
 static inline const char* GetFileName(const char* path)
 {
-    const char* file = std::strrchr(path, '/');
+    const char* file = strrchr(path, '/');
     if (file) return file + 1;
     return path;
 }

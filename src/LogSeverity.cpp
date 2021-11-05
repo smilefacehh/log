@@ -42,11 +42,11 @@ const char* GetLogColorBySeverity(LogSeverity log_severity)
     switch (log_severity)
     {
         case VERBOSE:
-            return "\033[36m";
-        case DEBUG:
             return "\033[35m";
+        case DEBUG:
+            return "\033[36m";
         case INFO:
-            return "\033[34m";
+            return "\033[32m";
         case WARN:
             return "\033[33m";
         case ERROR:

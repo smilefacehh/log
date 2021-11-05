@@ -1,8 +1,12 @@
 #pragma once
 
+#include <string>
+#include <memory>
+
+#include "../LogMessage.h"
+
 namespace Nlog
 {
-class LogMessage;
 // Logger代表日志输出后端，用户可以从Logger派生实现自定义的日志输出后端
 // 使用方会默认Logger::Write和Logger::Flush接口是线程安全的
 class Logger

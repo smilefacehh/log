@@ -87,16 +87,16 @@ class LogMessage
     BASIC_SIMPLE_LOG(const void*)
     BASIC_SIMPLE_LOG(long double)
 
-    inline LogMessage& operator<<(std::ostream& (*ostream_op)(std::ostream&)) { stream_ << ostream_op; return *this; }
     inline LogMessage& operator<<(const std::string& msg) { stream_ << msg; return *this; }
-
+    inline LogMessage& operator<<(std::ostream& (*ostream_fp)(std::ostream&)) { stream_ << ostream_fp; return *this; }
+    inline LogMessage& operator<<(const std::ios_base& (*ios_base_fp)(std::ios_base&)) { stream_ << ios_base_fp; return *this; }
 
     template<typename Iterator>
     inline LogMessage& WriteIterator(Iterator it_begin, Iterator it_end, std::size_t sz)
     {
-        stream_ << "{";
+        stream_ << "[";
         // todo:长度，间隔符
-        for(std::size_t i = 0; it_begin != it_end && i < 100; ++i, ++it_begin)
+        for(std::size_t i = 0; it_begin != it_end && i < 3; ++i, ++it_begin)
         {
             operator<<(*it_begin);
             stream_ << ((i < sz - 1) ? "," : "");
@@ -105,7 +105,7 @@ class LogMessage
         {
             stream_ << "...";
         }
-        stream_ << "}";
+        stream_ << "]";
 
         return *this;
     }

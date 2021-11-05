@@ -4,11 +4,14 @@ project(Nlog)
 set(CMAKE_CXX_STANDARD 11)
 add_compile_options(-Wall -Werror -Wno-error=unused-variable -O3 -fPIC)
 
-file(GLOB_RECURSE SOURCE_FILES ${PROJECT_SOURCE_DIR}/src "*.cpp")
+file(GLOB_RECURSE SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/install)
 
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 #add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+
+add_executable(example example.cpp)
+target_link_libraries(example ${PROJECT_NAME})
 
 install(DIRECTORY ./src/
   DESTINATION ./include/Nlog

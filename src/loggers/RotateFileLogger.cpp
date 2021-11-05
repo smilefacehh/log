@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <sstream>
+#include <iostream>
 
 #include "../Utils.h"
 
@@ -46,8 +47,8 @@ static time_t GetTsFromLoggingFileName(const std::string &log_file_name,
     constexpr int kLogFieldNum = 6;
     if (ret != kLogFieldNum) {
         // format error
-        ROBOLOG_STDERR() << "WARN: log file name format error, log_file_name:"
-                         << log_file_name;
+        std::cerr << "WARN: log file name format error, log_file_name:"
+                         << log_file_name << std::endl;
         return 0;
     }
     ltm.tm_year -= 1900;
@@ -59,7 +60,7 @@ static time_t GetTsFromLoggingFileName(const std::string &log_file_name,
 void RotateFileLogger::RecoverLoggingFile() {
     DIR *dir = opendir(dir_name_.c_str());
     if (nullptr == dir) {
-        ROBOLOG_STDERR() << "INFO: dir not exist, dir:" << dir_name_;
+        std::cerr << "INFO: dir not exist, dir:" << dir_name_ << std::endl;
         return;
     }
     struct dirent *dp = nullptr;
@@ -78,8 +79,8 @@ void RotateFileLogger::RecoverLoggingFile() {
                 GetFileNameWithTs(logging_ts, true, log_index_);
             log_file_ = fopen(log_file_name.c_str(), "a");
             if (nullptr == log_file_) {
-                ROBOLOG_STDERR() << "open old log file fail, log_file:"
-                                 << log_file_name;
+                std::cerr << "open old log file fail, log_file:"
+                                 << log_file_name << std::endl;
             } else {
                 written_bytes_ = GetFileSize(log_file_name);
                 last_log_timestamp_ = logging_ts;
@@ -177,7 +178,6 @@ void RotateFileLogger::CheckFileAndRotate() {
     // 打开新的日志文件
     std::string log_file_name = GetFileNameWithTs(cur_time, true, new_log_index);
 
-    ROBOLOG_DCHECK(log_file_ == nullptr);
     log_file_ = fopen(log_file_name.c_str(), "a");
     if (nullptr == log_file_) {
         // 打开文件失败直接返回，不更新最新的时间戳

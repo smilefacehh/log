@@ -7,8 +7,6 @@
 
 namespace Nlog
 {
-class LogMessage;
-
 class StdoutLogger : public Logger
 {
   public:

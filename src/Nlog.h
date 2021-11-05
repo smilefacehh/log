@@ -6,21 +6,19 @@
 #include "LogSeverity.h"
 #include "loggers/Logger.h"
 
-namespace Nlog
-{
 // 外部指定打印方法
-#define PLUG_LOG_VALID(log_severity) (Logging::IsPlugLoggerValid(log_severity))
+#define PLUG_LOG_VALID(log_severity) (Nlog::Logging::IsPlugLoggerValid(Nlog::log_severity))
 #define PLUG_LOG(log_severity) \
-    (LogMessage(log_severity, __FILE__, __func__, __LINE__, &Logging::LogToPlug##log_severity))
+    (Nlog::LogMessage(Nlog::log_severity, __FILE__, __func__, __LINE__, &Nlog::Logging::LogToPlug##log_severity))
 
 // 内部打印方法
-#define LOG_IS_ON(log_severity) (Logging::IsLogSeverityOn(log_severity))
+#define LOG_IS_ON(log_severity) (Nlog::Logging::IsLogSeverityOn(Nlog::log_severity))
 #define LOG(log_severity) \
-    (LogMessage(log_severity, __FILE__, __func__, __LINE__, &Logging::LogToAllLoggers))
+    (Nlog::LogMessage(Nlog::log_severity, __FILE__, __func__, __LINE__, &Nlog::Logging::LogToAllLoggers))
 
 // 如果外部指定打印方法，则选择外部方法，否则选择内部打印方法
 #define LOG_CHOOSE(log_severity) \
-    if(LOG_IS_ON(log_severity)) ((PLUG_LOG_VALID(log_severity)) ? (PLUG_LOG(log_severity)) : (LOG(log_severity)))
+    if (LOG_IS_ON(log_severity)) ((PLUG_LOG_VALID(log_severity)) ? (PLUG_LOG(log_severity)) : (LOG(log_severity)))
 
 #define LOG_VERBOSE(module) LOG_CHOOSE(VERBOSE) << "<" #module ">"
 #define LOG_DEBUG(module) LOG_CHOOSE(DEBUG) << "<" #module ">"
@@ -31,6 +29,8 @@ namespace Nlog
 
 #define LOG_V(value) #value ":" << value
 
+namespace Nlog
+{
 /**
  * Logging是日志管理类，非线程安全。
  */

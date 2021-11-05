@@ -1,5 +1,4 @@
 #include "Logger.h"
-#include "../LogMessage.h"
 
 namespace Nlog
 {
