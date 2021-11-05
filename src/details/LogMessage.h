@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "LogSeverity.h"
 #include "IterableContainer.h"
+#include "LogSeverity.h"
 
 namespace Nlog
 {

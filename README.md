@@ -1,5 +1,7 @@
 ## 特性
+
 在robolog的基础上增加以下功能
+
 1. 支持不同的logger自定义格式 ok
 2. 支持不同的logger自定义等级（低优先级）
 3. 支持console颜色区分头部、内容 ok
@@ -9,8 +11,13 @@
 7. 支持每次运行重新写一个新的日志文件，按文件大小切割
 
 todo
-1. timer定时刷日志
+
+1. timer定时刷日志 ok
 2. basic file logger，每次运行创建一个新的日志文件，按文件大小截断
 3. 代码里面的todo解决，容器类型的打印长度定义
 4. logger的名字暴露给用户设置
 5. 写readme，怎么用，例子展示
+6. 函数指针用functional看看 ok
+7. logging类用单例，加锁
+8. 暴露给用户的接口全部写到nlog.h里面
+9. 是否std::fixed暴露接口，标志位

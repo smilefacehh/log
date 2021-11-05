@@ -1,23 +1,24 @@
 #pragma once
 
+#include <chrono>
 #include <memory>
 
-#include "LogMessage.h"
-#include "LogSeverity.h"
+#include "details/LogMessage.h"
+#include "details/LogSeverity.h"
 #include "loggers/Logger.h"
 
 // 外部指定打印方法
 #define PLUG_LOG_VALID(log_severity) (Nlog::Logging::IsPlugLoggerValid(Nlog::log_severity))
-#define PLUG_LOG(log_severity) \
+#define PLUG_LOG(log_severity)                                                                                         \
     (Nlog::LogMessage(Nlog::log_severity, __FILE__, __func__, __LINE__, &Nlog::Logging::LogToPlug##log_severity))
 
 // 内部打印方法
 #define LOG_IS_ON(log_severity) (Nlog::Logging::IsLogSeverityOn(Nlog::log_severity))
-#define LOG(log_severity) \
+#define LOG(log_severity)                                                                                              \
     (Nlog::LogMessage(Nlog::log_severity, __FILE__, __func__, __LINE__, &Nlog::Logging::LogToAllLoggers))
 
 // 如果外部指定打印方法，则选择外部方法，否则选择内部打印方法
-#define LOG_CHOOSE(log_severity) \
+#define LOG_CHOOSE(log_severity)                                                                                       \
     if (LOG_IS_ON(log_severity)) ((PLUG_LOG_VALID(log_severity)) ? (PLUG_LOG(log_severity)) : (LOG(log_severity)))
 
 #define LOG_VERBOSE(module) LOG_CHOOSE(VERBOSE) << "<" #module ">"
@@ -29,8 +30,7 @@
 
 #define LOG_V(value) #value ":" << value
 
-namespace Nlog
-{
+namespace Nlog {
 /**
  * Logging是日志管理类，非线程安全。
  */
@@ -86,6 +86,19 @@ class Logging
     static void LogToStderr(const LogMessage& log_message);
 
     /**
+     * 定时刷新日志
+     * @param interval 间隔时长（s）
+     */
+    static void FlushEvery(std::chrono::seconds interval);
+
+    /**
+     * 关闭时调用
+     */
+    static void ShutDown();
+
+    typedef std::function<void(const char*)> PlugLogFunc;
+
+    /**
      * 设置外部logger方法，接管日志输出
      * @param log_verbose verbose
      * @param log_debug debug
@@ -94,9 +107,8 @@ class Logging
      * @param log_error error
      * @param log_fatal fata
      */
-    static void SetPlugLoggerFuncs(void (*log_verbose)(const char* log_text), void (*log_debug)(const char* log_text),
-                                   void (*log_info)(const char* log_text), void (*log_warn)(const char* log_text),
-                                   void (*log_error)(const char* log_text), void (*log_fatal)(const char* log_text));
+    static void SetPlugLoggerFuncs(PlugLogFunc log_verbose, PlugLogFunc log_debug, PlugLogFunc log_info,
+                                   PlugLogFunc log_warn, PlugLogFunc log_error, PlugLogFunc log_fatal);
 
     /**
      * 指定等级的logger是否有外部接管方法，如果没有则会调用自己的方法
@@ -116,4 +128,4 @@ class Logging
     static void LogToPlugERROR(const LogMessage& log_message);
     static void LogToPlugFATAL(const LogMessage& log_message);
 };
-}
+}  // namespace Nlog

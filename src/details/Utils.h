@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <type_traits>
 
 namespace Nlog
 {
@@ -17,4 +19,16 @@ bool DirectoryExists(const std::string& path);
  * @return true表示创建成功，否则失败
  */
 bool CreateDirectory(const std::string& path);
+
+
+#if __cplusplus >= 201402L
+using std::make_unique;
+#else
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&...args)
+{
+    static_assert(!std::is_array<T>::value, "arrays not supported");
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+#endif
 }

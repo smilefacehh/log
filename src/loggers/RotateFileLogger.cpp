@@ -9,7 +9,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "../Utils.h"
+#include "../details/Utils.h"
 
 namespace Nlog
 {

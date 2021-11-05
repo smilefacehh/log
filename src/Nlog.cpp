@@ -1,14 +1,20 @@
 #include "Nlog.h"
+
 #include <iostream>
 #include <vector>
 
-namespace Nlog
-{
+#include "details/PeriodicWorker.h"
+#include "details/Utils.h"
+
+namespace Nlog {
 // 打印日志等级
 static LogSeverity g_log_severity = DEBUG;
 
 // 日志输出后端
 static std::vector<LoggerPtr> g_loggers;
+
+// 定时刷新日志
+static std::unique_ptr<PeriodicWorker> periodic_flusher_;
 
 void Logging::SetLogSeverity(LogSeverity log_severity) { g_log_severity = log_severity; }
 
@@ -18,7 +24,7 @@ bool Logging::IsLogSeverityOn(LogSeverity log_severity) { return log_severity >=
 
 bool Logging::AddLogger(const LoggerPtr& logger)
 {
-    if(logger == nullptr) return false;
+    if (logger == nullptr) return false;
 
     for (auto& g_logger : g_loggers)
     {
@@ -75,58 +81,64 @@ void Logging::LogToStderr(const LogMessage& log_message)
     std::cerr.flush();
 }
 
-static void (*PlugLogVERBOSE)(const char* log_text) = nullptr;
-static void (*PlugLogDEBUG)(const char* log_text) = nullptr;
-static void (*PlugLogINFO)(const char* log_text) = nullptr;
-static void (*PlugLogWARN)(const char* log_text) = nullptr;
-static void (*PlugLogERROR)(const char* log_text) = nullptr;
-static void (*PlugLogFATAL)(const char* log_text) = nullptr;
-
-void Logging::SetPlugLoggerFuncs(void (*log_verbose)(const char* log_text), void (*log_debug)(const char* log_text),
-                                 void (*log_info)(const char* log_text), void (*log_warn)(const char* log_text),
-                                 void (*log_error)(const char* log_text), void (*log_fatal)(const char* log_text))
+void Logging::FlushEvery(std::chrono::seconds interval)
 {
-    PlugLogVERBOSE = log_verbose;
-    PlugLogDEBUG = log_debug;
-    PlugLogINFO = log_info;
-    PlugLogWARN = log_warn;
-    PlugLogERROR = log_error;
-    PlugLogFATAL = log_fatal;
+    periodic_flusher_ = make_unique<PeriodicWorker>(&Logging::FlushAllLoggers, interval);
+}
+
+void Logging::ShutDown() { periodic_flusher_.reset(); }
+
+static Logging::PlugLogFunc plug_log_verbose = nullptr;
+static Logging::PlugLogFunc plug_log_info = nullptr;
+static Logging::PlugLogFunc plug_log_debug = nullptr;
+static Logging::PlugLogFunc plug_log_warn = nullptr;
+static Logging::PlugLogFunc plug_log_error = nullptr;
+static Logging::PlugLogFunc plug_log_fatal = nullptr;
+
+void Logging::SetPlugLoggerFuncs(PlugLogFunc log_verbose, PlugLogFunc log_debug, PlugLogFunc log_info,
+                                 PlugLogFunc log_warn, PlugLogFunc log_error, PlugLogFunc log_fatal)
+{
+    plug_log_verbose = log_verbose;
+    plug_log_debug = log_debug;
+    plug_log_info = log_info;
+    plug_log_warn = log_warn;
+    plug_log_error = log_error;
+    plug_log_fatal = log_fatal;
 }
 
 bool Logging::IsPlugLoggerValid(LogSeverity log_severity)
 {
     if (log_severity == LogSeverity::VERBOSE)
     {
-        return PlugLogVERBOSE != nullptr;
+        return plug_log_verbose != nullptr;
     }
     else if (log_severity == LogSeverity::DEBUG)
     {
-        return PlugLogDEBUG != nullptr;
+        return plug_log_debug != nullptr;
     }
     else if (log_severity == LogSeverity::INFO)
     {
-        return PlugLogINFO != nullptr;
+        return plug_log_info != nullptr;
     }
     else if (log_severity == LogSeverity::WARN)
     {
-        return PlugLogWARN != nullptr;
+        return plug_log_warn != nullptr;
     }
     else if (log_severity == LogSeverity::ERROR)
     {
-        return PlugLogERROR != nullptr;
+        return plug_log_error != nullptr;
     }
     else if (log_severity == LogSeverity::FATAL)
     {
-        return PlugLogFATAL != nullptr;
+        return plug_log_fatal != nullptr;
     }
     return false;
 }
 
-void Logging::LogToPlugVERBOSE(const LogMessage& log_message) { PlugLogVERBOSE(log_message.GetLogText()); }
-void Logging::LogToPlugDEBUG(const LogMessage& log_message) { PlugLogDEBUG(log_message.GetLogText()); }
-void Logging::LogToPlugINFO(const LogMessage& log_message) { PlugLogINFO(log_message.GetLogText()); }
-void Logging::LogToPlugWARN(const LogMessage& log_message) { PlugLogWARN(log_message.GetLogText()); }
-void Logging::LogToPlugERROR(const LogMessage& log_message) { PlugLogERROR(log_message.GetLogText()); }
-void Logging::LogToPlugFATAL(const LogMessage& log_message) { PlugLogFATAL(log_message.GetLogText()); }
-}
+void Logging::LogToPlugVERBOSE(const LogMessage& log_message) { plug_log_verbose(log_message.GetLogText()); }
+void Logging::LogToPlugDEBUG(const LogMessage& log_message) { plug_log_debug(log_message.GetLogText()); }
+void Logging::LogToPlugINFO(const LogMessage& log_message) { plug_log_info(log_message.GetLogText()); }
+void Logging::LogToPlugWARN(const LogMessage& log_message) { plug_log_warn(log_message.GetLogText()); }
+void Logging::LogToPlugERROR(const LogMessage& log_message) { plug_log_error(log_message.GetLogText()); }
+void Logging::LogToPlugFATAL(const LogMessage& log_message) { plug_log_fatal(log_message.GetLogText()); }
+}  // namespace Nlog

@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 
-#include "../LogMessage.h"
+#include "../details/LogMessage.h"
 
 namespace Nlog
 {
